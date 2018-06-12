@@ -1,0 +1,7 @@
+index=windows EventCode=4634  <built-in domain admin>
+| mvexpand Account_Name 
+| search Account_Name!="*$" AND Account_Name!="-" AND Account_Name!="*@*" 
+| eval domain_stripped_user = replace(Security_ID, "<domain>\\\\", "") 
+| where domain_stripped_user!=Account_Name 
+| rename domain_stripped_user AS impersonated_user Account_Name AS suspect_user  
+| table _time impersonated_user suspect_user 
