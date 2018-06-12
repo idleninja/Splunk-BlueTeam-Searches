@@ -1,0 +1,6 @@
+eventtype=bro_dce_rpc  
+| bucket _time span=5m 
+| stats dc(operation) AS uniq_ops count(operation) AS ops_count values(operation) AS operations dc(id_resp_h) AS dest_count values(id_resp_h) AS dests  BY _time id_orig_h 
+| search uniq_ops=1 AND operations="NetrSessionEnum"
+| eval msg = "Possible User / Session Enumeration"
+| table _time id_orig_h dests dest_count uniq_ops operations ops_count msg
