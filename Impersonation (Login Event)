@@ -1,0 +1,10 @@
+index=windows sourcetype="WinEventLog:Security" EventCode=4624  Account_Domain="<domain>"  NOT identification
+| mvexpand Account_Name 
+| search Account_Name!="*$" AND Account_Name!="-" AND Account_Name!="*@*" 
+| mvexpand Security_ID
+| search Security_ID!="NULL SID" Security_ID!="NT AUTHORITY\*" Security_ID!="S-*" Security_ID!="Window Manager*" Security_ID!="NONE_MAPPED"
+| eval domain_stripped_user = lower(replace(Security_ID, "<domain>\\\\", ""))
+| eval Account_Name = lower(Account_Name)
+| where domain_stripped_user!=Account_Name 
+| rename domain_stripped_user AS impersonated_user Account_Name AS suspect_user 
+| table _time impersonated_user suspect_user authentication
