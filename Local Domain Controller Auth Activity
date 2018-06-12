@@ -1,0 +1,8 @@
+index=windows sourcetype="WinEventLog:Security" EventCode=4624 (Logon_Type=3 AND Process_Name!="C:\\Windows\\System32\\lsass.exe") OR (Logon_Type!=3)
+    [| ldapsearch domain=<domain> search="(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=8192))" 
+    | table name 
+    | rename name AS Workstation_Name] 
+| mvexpand Account_Name 
+| search Account_Name!="*$" AND Account_Name!="DWM-*" AND Account_Name!="-" 
+| lookup windows_logon_type logon_type AS Logon_Type 
+| table _time Account_Name logon_type_description Logon_Type Source_Network_Address Workstation_Name Process_Name Impersonation_Level
