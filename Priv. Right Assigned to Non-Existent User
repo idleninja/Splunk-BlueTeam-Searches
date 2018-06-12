@@ -1,0 +1,9 @@
+index=windows EventCode=4672 Account_Domain="<domain>" SeDebugPrivilege 
+| mvexpand Account_Name 
+| search Account_Name!="*$" AND Account_Name!="-" 
+| stats c by Account_Name 
+| ldapfilter domain=<domain> search="samaccountname=$Account_Name$" attrs="samaccountname" 
+| eval non_existent = case(isnull(samaccountname), "true", true(), "false") 
+| search non_existent="true" 
+| eval msg = "Privileged right assigned to non-existent user" 
+| table Account_Name msg authentication
