@@ -1,0 +1,6 @@
+index=win* 4769 EventCode=4769 [| ldapsearch domain=<domain> search="(&(objectCategory=user)(adminCount=1)(serviceprincipalname="*"))" | search name!="krbtgt"  | fields  name | rename name AS Service_Name] 
+| eval Account_Name = replace(lower(Account_Name), "@<domain>", "")
+| eval Client_Address = replace(Client_Address, "::ffff:", "") 
+| lookup dnslookup clientip AS Client_Address 
+| table _time Account_Name Client_Address clienthost Service_Name
+| where Account_Name!=Service_Name
