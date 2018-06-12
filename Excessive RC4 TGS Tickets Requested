@@ -1,0 +1,8 @@
+index=windows EventCode=4769 Ticket_Encryption_Type="0x17" Account_Name!="*$*" Service_Name!="*$" 
+| eval Client_Address = replace(Client_Address, "::ffff:", "") 
+| search Client_Address!="10.1.0.0/16" Client_Address!=<Server Subnets> 
+| stats dc(Service_Name) AS cnt  by Client_Address 
+| lookup dnslookup clientip AS Client_Address 
+| fillnull value="-" clienthost
+| sort - cnt
+| where cnt > 10
