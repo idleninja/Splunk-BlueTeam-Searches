@@ -1,0 +1,11 @@
+index=windows EventCode=4625 
+| mvexpand Account_Name 
+| search Account_Name!="*$" AND Account_Name!="-" AND Account_Name!="*@*"
+| ldapfilter domain=<domain> search="samaccountname=$Account_Name$" attrs="samaccountname"
+| eval non_existent = case(isnull(samaccountname), "true", true(), "false")
+| search non_existent="true"
+| stats earliest(_time) AS earliest_time latest(_time) AS latest_time values(Workstation_Name) AS Workstation_Name values(Source_Network_Address) AS source_network_address BY Account_Name EventCodeDescription
+| eval earliest_time=strftime(earliest_time, "%Y-%m-%d %H:%M:%S")
+| eval latest_time=strftime(latest_time, "%Y-%m-%d %H:%M:%S")
+| rename Workstation_Name AS source_workstation
+| table earliest_time latest_time Account_Name source_workstation source_network_address EventCodeDescription
